@@ -1,8 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using NLog.LayoutRenderers;
 using NLog;
-using OpenTelemetry;
-using OpenTelemetry.Trace;
 using System.Diagnostics;
 
 namespace Sample.DistributedTracing
@@ -32,12 +29,16 @@ namespace Sample.DistributedTracing
             logger = logFactory.GetCurrentClassLogger();
 
 
-            await DoSomeWork("banana", 8);
+            Task task1 =  DoSomeWork1("banana", 8);
+            Task task2 = DoSomeWork2("Apple", 1);
+
+            Task.WaitAll(task1, task2);
+
             Console.WriteLine("Example work done");
         }
 
         // All the functions below simulate doing some arbitrary work
-        static async Task DoSomeWork(string foo, int bar)
+        static async Task DoSomeWork1(string foo, int bar)
         {
 
             //using (var newActivity = new System.Diagnostics.Activity("MyOperation").Start())
@@ -49,32 +50,57 @@ namespace Sample.DistributedTracing
             //}
 
             //using (Activity activity = source.StartActivity("DoSomeWork"))
-            using (var newActivity = new System.Diagnostics.Activity("DoSomeWork").Start())
+            using (var newActivity = new System.Diagnostics.Activity("DoSomeWork1").Start())
             {
-                await StepOne();
-                await StepTwo();
-                logger.Info("DoSomeWork");
+                await StepOne1();
+                await StepTwo1();
+                logger.Info("DoSomeWork1");
             }
         }
 
-        static async Task StepOne()
+        static async Task StepOne1()
         {
             //using (Activity activity = source.StartActivity("StepOne"))
-            using (var newActivity = new System.Diagnostics.Activity("StepOne").Start())
+            using (var newActivity = new System.Diagnostics.Activity("StepOne1").Start())
             {
                 await Task.Delay(500);
-                logger.Info("StepOne");
+                logger.Info("StepOne1");
             }
         }
 
-        static async Task StepTwo()
+        static async Task StepTwo1()
         {
             //using (Activity activity = source.StartActivity("StepTwo"))
-            using (var newActivity = new System.Diagnostics.Activity("StepTwo").Start())
+            using (var newActivity = new System.Diagnostics.Activity("StepTwo1").Start())
             {
                 await Task.Delay(1000);
-                logger.Info("StepTwo");
+                logger.Info("StepTwo1");
             }
+        }
+
+
+        // All the functions below simulate doing some arbitrary work
+        static async Task DoSomeWork2(string foo, int bar)
+        {
+
+            using (var newActivity = new System.Diagnostics.Activity("DoSomeWork2").Start())
+            {
+                await StepOne2();
+                await StepTwo2();
+                logger.Info("DoSomeWork2");
+            }
+        }
+
+        static async Task StepOne2()
+        {
+            await Task.Delay(500);
+            logger.Info("StepOne2");
+        }
+
+        static async Task StepTwo2()
+        {
+            await Task.Delay(1000);
+            logger.Info("StepTwo2");
         }
     }
 }
