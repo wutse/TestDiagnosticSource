@@ -27,10 +27,10 @@ namespace Sample.DistributedTracing
             logFactory.Configuration = logConfig;
 
             logger = logFactory.GetCurrentClassLogger();
-
+            TestClass testClass = new TestClass(logger);
 
             Task task1 =  DoSomeWork1("banana", 8);
-            Task task2 = DoSomeWork2("Apple", 1);
+            Task task2 = testClass.DoSomeWork2("Apple", 1);
 
             Task.WaitAll(task1, task2);
 
@@ -54,7 +54,7 @@ namespace Sample.DistributedTracing
             {
                 await StepOne1();
                 await StepTwo1();
-                logger.Info("DoSomeWork1");
+                logger.Info("DoSomeWork1 End");
             }
         }
 
@@ -64,7 +64,7 @@ namespace Sample.DistributedTracing
             using (var newActivity = new System.Diagnostics.Activity("StepOne1").Start())
             {
                 await Task.Delay(500);
-                logger.Info("StepOne1");
+                logger.Info("StepOne1 End");
             }
         }
 
@@ -74,33 +74,43 @@ namespace Sample.DistributedTracing
             using (var newActivity = new System.Diagnostics.Activity("StepTwo1").Start())
             {
                 await Task.Delay(1000);
-                logger.Info("StepTwo1");
+                logger.Info("StepTwo1 End");
             }
         }
 
+    }
+
+    class TestClass
+    {
+        private NLog.Logger logger;
+
+        public TestClass(NLog.Logger logger)
+        {
+            this.logger = logger;
+        }
 
         // All the functions below simulate doing some arbitrary work
-        static async Task DoSomeWork2(string foo, int bar)
+        internal async Task DoSomeWork2(string foo, int bar)
         {
 
             using (var newActivity = new System.Diagnostics.Activity("DoSomeWork2").Start())
             {
                 await StepOne2();
                 await StepTwo2();
-                logger.Info("DoSomeWork2");
+                logger.Info("DoSomeWork2 End");
             }
         }
 
-        static async Task StepOne2()
+        async Task StepOne2()
         {
             await Task.Delay(500);
-            logger.Info("StepOne2");
+            logger.Info("StepOne2 End");
         }
 
-        static async Task StepTwo2()
+        async Task StepTwo2()
         {
             await Task.Delay(1000);
-            logger.Info("StepTwo2");
+            logger.Info("StepTwo2 End");
         }
     }
 }
